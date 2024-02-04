@@ -21,16 +21,22 @@ import { UserItem } from "./user-item";
 import { Item } from "./item";
 import { DocumentList } from "./document-list";
 
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import React, { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { TrashBox } from "./trash-box";
+import { useSearch } from "@/hooks/use-search";
+import { useSettings } from "@/hooks/use-settings";
+import { NavBar } from "./navbar";
 
 export const Navigation = () => {
+  const search = useSearch();
+  const settings = useSettings();
   const pathname = usePathname();
+  const params = useParams();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const create = useMutation(api.documents.create);
 
@@ -155,8 +161,8 @@ export const Navigation = () => {
         </div>
         <div>
           <UserItem />
-          <Item onClick={() => {}} label="Search" icon={Search} isSearch />
-          <Item onClick={() => {}} label="Settings" icon={Settings} />
+          <Item onClick={search.onOpen} label="Search" icon={Search} isSearch />
+          <Item onClick={settings.onOpen} label="Settings" icon={Settings} />
           <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
         </div>
         <div className="mt-4">
@@ -188,15 +194,19 @@ export const Navigation = () => {
           isMobile && "left-0 w-full"
         )}
       >
-        <nav>
-          {isCollapsed && (
-            <MenuIcon
-              onClick={resetWidth}
-              className="h-6 w-6 text-muted-foreground"
-              role="button"
-            />
-          )}
-        </nav>
+        {!!params.documentId ? (
+          <NavBar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
+        ) : (
+          <nav>
+            {isCollapsed && (
+              <MenuIcon
+                onClick={resetWidth}
+                className="h-6 w-6 text-muted-foreground"
+                role="button"
+              />
+            )}
+          </nav>
+        )}
       </div>
     </>
   );
